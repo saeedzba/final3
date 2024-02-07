@@ -28,7 +28,7 @@ return (
       </Head>
 
       <main className={styles.main}>
-        <ConnectWallet />
+     //   <ConnectWallet />
        
           <div className={styles.buttoncontainer}>
           
