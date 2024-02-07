@@ -27,7 +27,7 @@ return (
         <link href="/favicon.ico" rel="icon" />
       </Head>
 
-      <main className={styles.main}>
+     // <main className={styles.main}>
      //   <ConnectWallet />
        
           <div className={styles.buttoncontainer}>
